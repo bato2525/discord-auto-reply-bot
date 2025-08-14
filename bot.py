@@ -7,6 +7,7 @@ load_dotenv()
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.reactions = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -52,6 +53,20 @@ async def on_message(message):
     
     await bot.process_commands(message)
 
+@bot.event
+async def on_reaction_add(reaction, user):
+    # BOT自身のリアクションは無視
+    if user == bot.user:
+        return
+    
+    # 許可されたチャンネルでない場合は反応しない
+    if not is_allowed_channel(reaction.message.channel.id):
+        return
+    
+    # サムズアップ（👍）のリアクションをチェック
+    if str(reaction.emoji) == '👍':
+        await reaction.message.channel.send('グッドマークが押されたよ')
+
 # 通常のコマンド
 @bot.command(name='ping')
 async def ping(ctx):
@@ -92,7 +107,7 @@ async def slash_info(interaction: discord.Interaction):
         description="Discordオウム返しBOT",
         color=discord.Color.blue()
     )
-    embed.add_field(name="機能", value="• メッセージのオウム返し\n• スラッシュコマンド\n• メンション応答", inline=False)
+    embed.add_field(name="機能", value="• メッセージのオウム返し\n• スラッシュコマンド\n• メンション応答\n• サムズアップリアクション応答", inline=False)
     embed.add_field(name="コマンド", value="• `/ping` - 応答テスト\n• `/hello` - 挨拶\n• `/echo` - オウム返し\n• `/info` - この情報", inline=False)
     embed.add_field(name="制限", value=f"• チャンネルID: {ALLOWED_CHANNEL_ID}", inline=False)
     if bot.user:
