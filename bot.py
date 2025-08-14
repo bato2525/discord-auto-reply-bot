@@ -43,10 +43,10 @@ async def on_message(message):
     
     # メンションされた場合は特別な応答
     if bot.user and bot.user.mentioned_in(message):
-        await message.channel.send(f'{message.author.mention}さん、何かご用でしょうか？')
+        await message.channel.send('何かご用でしょうか？')
     else:
         # 通常のメッセージはオウム返し
-        await message.channel.send(f'{message.author.mention}: {message.content}')
+        await message.channel.send(message.content)
     
     await bot.process_commands(message)
 
@@ -78,7 +78,7 @@ async def slash_echo(interaction: discord.Interaction, text: str):
     if not is_allowed_channel(interaction.channel_id):
         await interaction.response.send_message('このチャンネルではコマンドを使用できません。', ephemeral=True)
         return
-    await interaction.response.send_message(f'{interaction.user.mention}: {text}')
+    await interaction.response.send_message(text)
 
 @bot.tree.command(name='info', description='BOTの情報を表示します')
 async def slash_info(interaction: discord.Interaction):
