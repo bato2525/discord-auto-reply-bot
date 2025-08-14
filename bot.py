@@ -13,8 +13,10 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 # 許可されたチャンネルIDを取得
 ALLOWED_CHANNEL_ID = int(os.getenv('ALLOWED_CHANNEL_ID', 0))
 
-def is_allowed_channel(channel_id: int) -> bool:
+def is_allowed_channel(channel_id: int | None) -> bool:
     """指定されたチャンネルでのみ反応するかチェック"""
+    if channel_id is None:
+        return False
     return ALLOWED_CHANNEL_ID == 0 or channel_id == ALLOWED_CHANNEL_ID
 
 @bot.event
