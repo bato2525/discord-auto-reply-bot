@@ -13,6 +13,11 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 @bot.event
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
+    try:
+        synced = await bot.tree.sync()
+        print(f'スラッシュコマンドを{len(synced)}個同期しました')
+    except Exception as e:
+        print(f'スラッシュコマンドの同期に失敗しました: {e}')
 
 @bot.event
 async def on_message(message):
@@ -34,9 +39,32 @@ async def on_message(message):
     
     await bot.process_commands(message)
 
+# 通常のコマンド
 @bot.command(name='ping')
 async def ping(ctx):
     await ctx.send('Pong!')
+
+# スラッシュコマンド
+@bot.tree.command(name='ping', description='BOTの応答速度をテストします')
+async def slash_ping(interaction: discord.Interaction):
+    await interaction.response.send_message('Pong! 🏓')
+
+@bot.tree.command(name='hello', description='挨拶をします')
+async def slash_hello(interaction: discord.Interaction):
+    await interaction.response.send_message(f'こんにちは、{interaction.user.mention}さん！👋')
+
+@bot.tree.command(name='info', description='BOTの情報を表示します')
+async def slash_info(interaction: discord.Interaction):
+    embed = discord.Embed(
+        title="BOT情報",
+        description="Discord自動返信BOT",
+        color=discord.Color.blue()
+    )
+    embed.add_field(name="機能", value="• 自動返信\n• スラッシュコマンド\n• メンション応答", inline=False)
+    embed.add_field(name="コマンド", value="• `/ping` - 応答テスト\n• `/hello` - 挨拶\n• `/info` - この情報", inline=False)
+    if bot.user:
+        embed.set_footer(text=f"Made by {bot.user.name}")
+    await interaction.response.send_message(embed=embed)
 
 if __name__ == '__main__':
     token = os.getenv('DISCORD_TOKEN')
