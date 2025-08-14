@@ -54,18 +54,20 @@ async def on_message(message):
     await bot.process_commands(message)
 
 @bot.event
-async def on_reaction_add(reaction, user):
+async def on_raw_reaction_add(payload):
     # BOT自身のリアクションは無視
-    if user == bot.user:
+    if payload.user_id == bot.user.id:
         return
     
     # 許可されたチャンネルでない場合は反応しない
-    if not is_allowed_channel(reaction.message.channel.id):
+    if not is_allowed_channel(payload.channel_id):
         return
     
     # サムズアップ（👍）のリアクションをチェック
-    if str(reaction.emoji) == '👍':
-        await reaction.message.channel.send('グッドマークが押されたよ')
+    if str(payload.emoji) == '👍':
+        channel = bot.get_channel(payload.channel_id)
+        if channel:
+            await channel.send('グッドマークが押されたよ')
 
 # 通常のコマンド
 @bot.command(name='ping')
