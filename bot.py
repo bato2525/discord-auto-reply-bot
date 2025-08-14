@@ -36,18 +36,17 @@ async def on_message(message):
         await bot.process_commands(message)
         return
     
-    content = message.content.lower()
+    # コマンドの場合は処理しない（コマンド処理に任せる）
+    if message.content.startswith('!') or message.content.startswith('/'):
+        await bot.process_commands(message)
+        return
     
-    if 'こんにちは' in content or 'hello' in content:
-        await message.channel.send(f'こんにちは、{message.author.mention}さん！')
-    elif 'おはよう' in content or 'good morning' in content:
-        await message.channel.send(f'おはようございます、{message.author.mention}さん！')
-    elif 'おやすみ' in content or 'good night' in content:
-        await message.channel.send(f'おやすみなさい、{message.author.mention}さん！')
-    elif 'ありがとう' in content or 'thank you' in content or 'thanks' in content:
-        await message.channel.send(f'どういたしまして、{message.author.mention}さん！')
-    elif bot.user and bot.user.mentioned_in(message):
+    # メンションされた場合は特別な応答
+    if bot.user and bot.user.mentioned_in(message):
         await message.channel.send(f'{message.author.mention}さん、何かご用でしょうか？')
+    else:
+        # 通常のメッセージはオウム返し
+        await message.channel.send(f'{message.author.mention}: {message.content}')
     
     await bot.process_commands(message)
 
@@ -74,6 +73,13 @@ async def slash_hello(interaction: discord.Interaction):
         return
     await interaction.response.send_message(f'こんにちは、{interaction.user.mention}さん！👋')
 
+@bot.tree.command(name='echo', description='入力したテキストをオウム返しします')
+async def slash_echo(interaction: discord.Interaction, text: str):
+    if not is_allowed_channel(interaction.channel_id):
+        await interaction.response.send_message('このチャンネルではコマンドを使用できません。', ephemeral=True)
+        return
+    await interaction.response.send_message(f'{interaction.user.mention}: {text}')
+
 @bot.tree.command(name='info', description='BOTの情報を表示します')
 async def slash_info(interaction: discord.Interaction):
     if not is_allowed_channel(interaction.channel_id):
@@ -81,11 +87,11 @@ async def slash_info(interaction: discord.Interaction):
         return
     embed = discord.Embed(
         title="BOT情報",
-        description="Discord自動返信BOT",
+        description="Discordオウム返しBOT",
         color=discord.Color.blue()
     )
-    embed.add_field(name="機能", value="• 自動返信\n• スラッシュコマンド\n• メンション応答", inline=False)
-    embed.add_field(name="コマンド", value="• `/ping` - 応答テスト\n• `/hello` - 挨拶\n• `/info` - この情報", inline=False)
+    embed.add_field(name="機能", value="• メッセージのオウム返し\n• スラッシュコマンド\n• メンション応答", inline=False)
+    embed.add_field(name="コマンド", value="• `/ping` - 応答テスト\n• `/hello` - 挨拶\n• `/echo` - オウム返し\n• `/info` - この情報", inline=False)
     embed.add_field(name="制限", value=f"• チャンネルID: {ALLOWED_CHANNEL_ID}", inline=False)
     if bot.user:
         embed.set_footer(text=f"Made by {bot.user.name}")
