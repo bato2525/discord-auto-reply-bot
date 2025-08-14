@@ -56,7 +56,7 @@ async def on_message(message):
 @bot.event
 async def on_raw_reaction_add(payload):
     # BOT自身のリアクションは無視
-    if payload.user_id == bot.user.id:
+    if bot.user and payload.user_id == bot.user.id:
         return
     
     # 許可されたチャンネルでない場合は反応しない
@@ -66,7 +66,7 @@ async def on_raw_reaction_add(payload):
     # サムズアップ（👍）のリアクションをチェック
     if str(payload.emoji) == '👍':
         channel = bot.get_channel(payload.channel_id)
-        if channel:
+        if channel and hasattr(channel, 'send'):
             await channel.send('グッドマークが押されたよ')
 
 # 通常のコマンド
