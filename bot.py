@@ -66,7 +66,7 @@ async def on_raw_reaction_add(payload):
     # サムズアップ（👍）のリアクションをチェック
     if str(payload.emoji) == '👍':
         channel = bot.get_channel(payload.channel_id)
-        if channel and hasattr(channel, 'send'):
+        if isinstance(channel, discord.abc.Messageable):
             await channel.send('グッドマークが押されたよ')
 
 # 通常のコマンド
